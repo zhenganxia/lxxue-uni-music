@@ -1,0 +1,80 @@
+{
+    "pages": [ //pages数组中第一项表示应用启动页，参考：https://uniapp.dcloud.io/collocation/pages
+        {
+            "path": "pages/layout/index",
+            "name": "login",
+            "desc": "主页",
+            "style": {
+            	"navigationStyle":"custom",// 去掉微信小程序顶部导航
+            	"app-plus":{
+            		"titleNView":false //去掉app+h5顶部导航
+            	}
+            }
+        },
+        {
+            "path": "pages/discover/container/recommend/index",
+            "name": "attention",
+            "desc": "每日推荐",
+            "style": {
+				"navigationBarTitleText": "每日推荐",
+				"navigationBarBackgroundColor":"#fff"
+			}
+        },
+        {
+            "path": "pages/songList/index",
+            "name": "attention",
+            "desc": "推荐歌单",
+            "style": {
+				"navigationBarTitleText": "推荐歌单",
+				"navigationBarBackgroundColor":"#fff"
+			}
+        },
+        {
+            "path": "pages/annLike/index",
+            "name": "attention",
+            "desc": "安安like",
+            "style": {
+				"navigationBarTitleText": "Ann Like",
+				"navigationBarBackgroundColor":"#fff"
+			}
+        },
+        {
+            "path": "pages/discover/container/goodSing/songs",
+            "name": "googSingSongs",
+            "desc": "热门歌手歌曲"
+        },
+        {
+            "path": "pages/music/index",
+            "name": "music",
+            "desc": "歌曲播放",
+            "style": {
+            	"navigationStyle":"custom",// 去掉微信小程序顶部导航
+            	"app-plus":{
+            		"titleNView":false //去掉app+h5顶部导航
+            	}
+            }
+        },
+        {
+            "path": "pages/error/index",
+            "name": "404",
+            "style": {
+                "app-plus": {
+                    "titleNView": false
+                }
+            }
+        }
+    ],
+    "easycom": {
+		"autoscan": true,
+		"custom": {
+			// uni-ui 规则如下配置
+			"^uni-(.*)": "@dcloudio/uni-ui/lib/uni-$1/uni-$1.vue"
+		}
+	},
+    "globalStyle": {
+        "navigationBarTextStyle": "black",
+        "navigationBarTitleText": "uni-app",
+        "navigationBarBackgroundColor": "#F8F8F8",
+        "backgroundColor": "#F8F8F8"
+    }
+}
