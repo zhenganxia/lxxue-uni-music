@@ -507,8 +507,7 @@ body {
 }
 
 .music {
-  padding-top: 70rpx;
-  height: 85%;
+  height: 90%;
 }
 
 .music_title {
