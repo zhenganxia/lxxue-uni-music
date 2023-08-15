@@ -48,6 +48,7 @@ export default {
     onSearch() {},
     // 搜索条件
     async getSearchList() {
+      if(!this.value) return
       const res = await discoverSearch({ keywords: this.value });
       const { code, result } = res.data;
       if (code === 200) {

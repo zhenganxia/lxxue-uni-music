@@ -82,7 +82,7 @@ export default {
   },
   methods: {
     async topDetail() {
-      const res = await getPlayDetail({ id });
+      const res = await getPlayDetail({ id:'3778678'});
       const { code, playlist } = res.data;
       // console.log('222222222222222222222222',playlist)
       if(playlist?.tracks&&playlist?.tracks.length>0) {

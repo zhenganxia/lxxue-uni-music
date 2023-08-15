@@ -26,6 +26,13 @@ import fm from "../fm/index.vue"; // FM
 import panel from './panel'
 import slidePanel from "@/components/slidePanel.vue";
 import { mapGetters } from "vuex";
+import {
+  getQrKey,
+  getQrCreate,
+  getQrCheck,
+  getLoginStatus,
+  getCellphone,
+} from "@/api/discover.js";
 export default {
   name: "Layout",
   components: { discover, bottomBar, slidePanel, mine, cloud, fm, panel },
@@ -36,11 +43,34 @@ export default {
       paddingBottomHeight: 26,
     };
   },
-  methods: {},
+  methods: {
+    async formSubmit(e) {
+      const user = await getCellphone(this.user);
+      this.cookie = user.data.cookie;
+      console.log('1111111',this.cookie)
+      uni.setStorageSync('cookie',this.cookie)
+      this.loginUserInfo(this.cookie)
+    },
+    async loginUserInfo(cookie) {
+      // 登录获取用户信息
+      let loginStatus = await getLoginStatus({ cookie });
+      const { code, account } = loginStatus.data.data;
+      if (code === 200) {
+        uni.setStorageSync("userInfo", JSON.stringify(account));
+        if (account) {
+          uni.showToast({
+            title: '已登录',
+            icon: 'none',
+          });
+        }
+      }
+    },
+  },
   computed: {
     ...mapGetters(["showPanel", "currentActive"]),
   },
-  created() {
+  async created() {
+    this.formSubmit()
     uni.getSystemInfo({
       success: function (res) {
         let model = ["X", "XR", "XS", "11", "12", "13", "14", "15"];
