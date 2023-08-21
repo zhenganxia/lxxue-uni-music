@@ -90,7 +90,7 @@ export default {
       });
     },
     async getHotSongs(id) {
-      const res = await getPlayDetail({ id });
+      const res = await getPlayDetail({ id:'3779629' });
       const { code, playlist } = res?.data;
       if (playlist?.tracks&&playlist?.tracks.length>0) {
         if (code === 200) {

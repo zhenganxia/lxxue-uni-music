@@ -71,14 +71,8 @@ export default {
       duration: 500,
     };
   },
-  watch: {
-    hotTop: {
-      handler(newValue) {
-          // 获取榜单详情
-          this.topDetail(newValue.id);
-      },
-      immediate: true,
-    },
+  mounted() {
+    this.topDetail()
   },
   methods: {
     async topDetail() {

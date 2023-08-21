@@ -25,23 +25,23 @@ export default {
             hotAcgTop:{}
         };
     },
-    created() {
-     this.topListInfo()
-    },
-    methods: {
-    async topListInfo() {
+    // created() {
+     // this.topListInfo()
+    //},
+    //methods: {
+    //async topListInfo() {
         // 所有榜单
-        const res = await getTopList();
-        const { code, list } = res?.data;
-        if (code === 200) {
-          this.topList = list || []
+       // const res = await getTopList();
+       // const { code, list } = res?.data;
+        //if (code === 200) {
+         // this.topList = list || []
           // 热歌
-          this.hotTop = this.topList.find(item=>item.id === 3778678)
+         // this.hotTop = this.topList.find(item=>item.id === 3778678)
           // 新歌榜
-          this.hotAcgTop = this.topList.find(item=>item.id === 3779629)
-        }
-      }
-    }
+          //this.hotAcgTop = this.topList.find(item=>item.id === 3779629)
+        //}
+      //}
+    //}
 };
 </script>
 
