@@ -47,9 +47,11 @@ export default {
     async formSubmit(e) {
       const user = await getCellphone(this.user);
       this.cookie = user.data.cookie;
-      console.log('1111111',this.cookie)
-      uni.setStorageSync('cookie',this.cookie)
-      this.loginUserInfo(this.cookie)
+      const cookie = uni.getStorageSync('cookie')
+      if(!cookie) {
+        uni.setStorageSync('cookie',this.cookie)
+        this.loginUserInfo(this.cookie)
+      }
     },
     async loginUserInfo(cookie) {
       // 登录获取用户信息

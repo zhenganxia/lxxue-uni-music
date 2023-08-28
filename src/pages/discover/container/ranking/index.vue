@@ -14,14 +14,14 @@
           v-for="(item, index) in hotTopList" :key="index"
         >
           <view v-for="(song, songIndex) in item" :key="songIndex">
-            <view class="flex-between ranking-item-unit">
+            <view class="flex-between ranking-item-unit" @click="playSing(song)">
               <view class="flex-start">
                 <img :src="song.al.picUrl" alt="" class="swiper-slide-img" />
                 <view>
                   <p class="reg-text-name">{{ song.name }}</p>
                 </view>
               </view>
-              <view class="ranking-item-play" @click="playSing(song)">
+              <view class="ranking-item-play" >
                 <uni-icons type="forward" size="15"></uni-icons>
               </view>
             </view>
@@ -179,8 +179,7 @@ export default {
   }
 
   .margin-title {
-    margin-left: 20rpx;
-    margin-top: 20rpx;
+    margin: 25rpx 0 0  32rpx;
   }
 
   .margin-right {

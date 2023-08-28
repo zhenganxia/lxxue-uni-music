@@ -6,7 +6,7 @@
       <container></container>
     </view>
     <!-- 搜索数据展示 -->
-    <view v-if="searchList.length > 0">
+    <view v-if="searchList.length > 0" style="height:100vh;">
       <view v-for="(item, index) in searchList" :key="index">
         <view 
           class="search"

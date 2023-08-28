@@ -25,6 +25,7 @@
 </template>
 <script>
 import { getPlayDetail } from "@/api/discover.js";
+import defaultImages from './config'
 export default {
   props: {
     hotTop: {
@@ -37,33 +38,7 @@ export default {
   data() {
     return {
       name: "",
-      recommendList: [],
-      defaultImages: [
-        {
-          al: {
-            name: "『1w+热评』欧美万评撩耳男声（单曲循环）",
-            picUrl:
-              "http://p1.music.126.net/xLDdcvX4nVVHePy8qcvYVQ==/109951163994703160.jpg?param=140y140",
-          },
-          id:'2049512697'
-        },
-        {
-          al: {
-            name: "戳爷/黄老板/断眉/萌德/骚姆/比伯/烟卷",
-            picUrl:
-              "http://p2.music.126.net/Izq2rrMzKPNaxmgg0O0KNA==/19155691579189685.jpg?param=140y140",
-          },
-          id:'2049512697'
-        },
-        {
-          al: {
-            name: "孙美琪疑案 第一集 欢迎回来（4.14开播 每周五更新）",
-            picUrl:
-              "http://p2.music.126.net/ATce5mCIf_GqCLBqJcmzTg==/109951165166142900.jpg?param=140y140",
-          },
-          id:'2049512697'
-        },
-      ],
+      recommendList: defaultImages,
       background: ["color1", "color2", "color3"],
       indicatorDots: true,
       autoplay: false,
@@ -85,9 +60,7 @@ export default {
           this.name = name;
           this.recommendList = tracks;
         }
-      } else {
-        this.recommendList = this.defaultImages
-      }
+      } 
     },
     topSong(al) {
       // 点击图片播放歌曲
@@ -113,7 +86,9 @@ export default {
 <style lang="scss" scoped>
 .discover-recommend {
   .recommend-reg {
-    padding: 20rpx 30rpx;
+    // padding: 20rpx 30rpx;
+    width: 690rpx;
+    margin:0 auto;
     display: flex;
     overflow-x: scroll;
   }
@@ -124,8 +99,7 @@ export default {
   }
 
   .margin-title {
-    margin-left: 20rpx;
-    margin-top: 20rpx;
+    margin: 25rpx 32rpx;
   }
 
   .recommend-sing-title {
@@ -137,14 +111,14 @@ export default {
   }
 
   .swiper-slide-img {
-    width: 200rpx;
+    width: 190rpx;
     height: 100%;
     object-fit: contain;
     border-radius: 20rpx;
   }
 
   .reg-text {
-    width: 100px;
+    width: 190rpx;
     .reg-text-name{
       width: 100%;
       overflow: hidden;

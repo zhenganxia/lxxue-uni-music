@@ -18,7 +18,8 @@ import {
     ARTISTS,
     ARTISTS_SONGS,
     PERSONALIZED,
-    LIKELIST
+    LIKELIST,
+    PLAY_LIST
     // VIDEO_URL,
     
     // VIDEO_DETAIL,
@@ -47,4 +48,5 @@ export const getArtists = (data) => fetch('GET', ARTISTS, data); //
 export const getArtistsSongs = (data) => fetch('GET', ARTISTS_SONGS, data); // 歌手歌曲
 export const getPersonalized= (data) => fetch('GET', PERSONALIZED, data); // 推荐歌单
 export const getLike= (data) => fetch('GET', LIKELIST, data); // 喜欢歌曲列表
+export const getLikePlay= (data) => fetch('GET', PLAY_LIST, data); // 歌单详详情列表
 

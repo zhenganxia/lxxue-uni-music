@@ -51,6 +51,11 @@ export default {
           icon:paihang
         },
         {
+          title: "小古文",
+          url: "/pages/guWen/index",
+          icon:tushu
+        },
+        {
           title: "每日推荐",
           url: "/pages/discover/container/recommend/index",
           icon:meirituijian
@@ -64,11 +69,6 @@ export default {
           title: "私人FM",
           url: "",
           icon:bofangxiaodianshi
-        },
-        {
-          title: "有声书",
-          url: "",
-          icon:tushu
         },
         {
           title: "数字专辑",

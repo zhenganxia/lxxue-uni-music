@@ -1,13 +1,13 @@
 <template>
-  <scroll-view scroll-x class="page" @scrolltolower="scroll" scroll-with-animation :refresher-enabled="true">
+  <scroll-view scroll-x class="page"  @scrolltolower="scroll" scroll-with-animation :refresher-enabled="true">
     <view class="discover-good-sing">
       <view class="flex-between margin-title">
         <view class="flex-start">
           <p class="good-sing-title">热门歌手</p>
-          <view class="flex-start good-sing-play">
-            <!-- <uni-icons type="forward" size="15"></uni-icons>
-            <p>查看</p> -->
-          </view>
+          <!-- <view class="flex-start good-sing-play">
+            <uni-icons type="forward" size="15"></uni-icons>
+            <p>查看</p>
+          </view> -->
         </view>
         <!-- <view class="margin-right good-icon" @click="allSongsList">
           <uni-icons type="more-filled" size="18" />
@@ -16,16 +16,19 @@
       <view class="good-reg flex-start">
         <view v-for="(item, index) in articles" :key="index" :class="{ 'margin-right': index !== articles.length - 1 }"
           class="good-item">
-          <view class="flex-between">
+          <view class="flex-between" @click="topSong(item)">
             <view class="flex-start">
-              <img :src="item.picUrl" alt="" class="swiper-slide-img" />
+              <!-- <view class="swiper-slide-img" > -->
+                <img :src="item.picUrl" alt="" class="swiper-slide-img"/>
+              <!-- </view> -->
               <view>
                 <p class="reg-text">{{ item.name }}</p>
+                <p  style="font-size:15rpx;margin-left: 10rpx;">{{ item.alias[0] }}</p>
               </view>
             </view>
-            <view class="good-item-play" @click="topSong(item)">
+            <!-- <view class="good-item-play" >
               <uni-icons type="forward" size="15"></uni-icons>
-            </view>
+            </view> -->
           </view>
         </view>
       </view>
@@ -69,7 +72,6 @@ export default {
       const { code, artists } = res.data
       if (code === 200) {
         this.articles = [...this.articles, ...artists]
-        this.articles = this.filterArray(this.articles)
       } else {
         this.articles = defaultImages.songs
       }
@@ -106,6 +108,8 @@ export default {
 </script>
 <style lang="scss" scoped>
 .discover-good-sing {
+  width: 690rpx;
+  margin:0 auto;
   .good-sing-play {
     padding: 6rpx;
     background-color: rgb(231, 228, 228);
@@ -119,16 +123,14 @@ export default {
   }
 
   .good-reg {
-    padding: 20rpx 30rpx;
-    height: 350rpx;
+    height: 780rpx;
     flex-direction: column;
     flex-wrap: wrap;
 
     .good-item {
-      width: 90%;
-
-      .swiper-slide-img {
-        width: 120rpx;
+      width: 95%;
+  .swiper-slide-img {
+        width: 160rpx;
         height: 100%;
         object-fit: contain;
         border-radius: 20rpx;
@@ -136,7 +138,9 @@ export default {
       }
 
       .reg-text {
-        font-weight: 600;
+        font-weight: 500;
+        font-size: 30rpx;
+        margin-left: 10rpx;
       }
 
       .reg-text-name {
@@ -154,8 +158,7 @@ export default {
   }
 
   .margin-title {
-    margin-left: 20rpx;
-    margin-top: 20rpx;
+    margin: 25rpx 0
   }
 
   .margin-right {
@@ -166,8 +169,4 @@ export default {
     transform: rotate(90deg);
   }
 
-  ::-webkit-scrollbar {
-    /* 可以滑动不展示滚动条 */
-    display: none;
-  }
 }</style>

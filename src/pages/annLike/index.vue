@@ -8,35 +8,50 @@
           <view class="sign-header flex-between" @click="playSing('')">
             <view class="flex-start">
               <view class="sign-icon-imag">
-                <image style="width: 100%; height: 100%" mode="aspectFill" :src="bofang"></image>
+                <image
+                  style="width: 100%; height: 100%"
+                  mode="aspectFill"
+                  :src="bofang"
+                ></image>
               </view>
               <view> 播放全部 </view>
             </view>
           </view>
         </view>
         <view class="anLike-scroll">
-          <view v-for="(item, index) in recommendList" :key="index" class="anLike-sing">
-            <view class="flex-between">
+          <view
+            v-for="(item, index) in recommendList"
+            :key="index"
+            class="anLike-sing"
+          >
+            <view class="flex-between"  @click="playSing(item.id)">
               <view class="flex-start">
                 <view>
-                  <image :src="item.al.picUrl" alt="" class="swiper-slide-img" />
+                  <image
+                    :src="item.al.picUrl"
+                    alt=""
+                    class="swiper-slide-img"
+                  />
                 </view>
                 <view>
                   <p class="reg-text">{{ item.name }}</p>
                 </view>
               </view>
               <view class="flex-start">
-                <view class="list-play" @click="playSing(item.id)">
-                  <image style="width: 100%; height: 100%" mode="aspectFill" :src="listPlay"></image>
+                <view class="list-play">
+                  <image
+                    style="width: 100%; height: 100%"
+                    mode="aspectFill"
+                    :src="listPlay"
+                  ></image>
                 </view>
-                <view class="good-icon">
+                <!-- <view class="good-icon">
                   <uni-icons type="more-filled" size="18" />
-                </view>
+                </view> -->
               </view>
             </view>
           </view>
         </view>
-
       </view>
     </view>
   </scroll-view>
@@ -46,8 +61,8 @@
 import bofang from "@/static/imgSvg/24gf-playCircle.svg";
 import listPlay from "@/static/imgSvg/playSquare.svg";
 import { getSongDetail } from "@/api/discover.js";
-import { pageInfo } from '@/utils/tool'
-import defaultImages from './config'
+import { pageInfo } from "@/utils/tool";
+import defaultImages from "./config";
 // import skeleton from '@/components//skeleton.vue'
 export default {
   name: "songList",
@@ -57,13 +72,13 @@ export default {
       pageNum: 1,
       pageSize: 10,
       initList: [], // 初始所有数据
-      recommendList: [],
+      recommendList: defaultImages.songs,
       paddingBottomHeight: 0,
       bofang,
       listPlay,
       value: "",
       active: "",
-      title: "Hello"
+      title: "Hello",
     };
   },
   created() {
@@ -86,40 +101,69 @@ export default {
   methods: {
     // 滚动底部触发
     scroll() {
-      const info = JSON.parse(this.initList)
-      const { currentInfo, nextNum } = pageInfo(this.pageSize, this.pageNum, info)
-      this.pageNum = nextNum
+      const info = JSON.parse(this.initList);
+      const { currentInfo, nextNum } = pageInfo(
+        this.pageSize,
+        this.pageNum,
+        info
+      );
+      this.pageNum = nextNum;
       // 当初始数据和当前数据长度相同不再获取数据
-      if (this.recommendList.length === info.length) return
-      this.recommendList = [...this.recommendList, ...currentInfo]
+      if (this.recommendList.length === info.length) return;
+      this.recommendList = [...this.recommendList, ...currentInfo];
     },
     async getSongList() {
       const cookie = uni.getStorageSync("cookie");
       if (cookie) {
-        const likeId = ['2036015243', '532777119', '1847510147', '1897469512',
-          '1450707917', '1901371647', '1191250809',
-          '1844720844', '1989690962', '29498161', '1990450477',
-          '28461933', '1831241783', '1393582057', '1431253446',
-          '1498349481','193168','1357155628','1380849352']
-        const ids = likeId.join(',')
+        const likeId = [
+          "1918224097",
+          "2036015243",
+          "1973377523",
+          "1897469512",
+          "1450707917",
+          "1942878138",
+          "1191250809",
+          "1844720844",
+          "1989690962",
+          "29498161",
+          "1990450477",
+          "28461933",
+          "1831241783",
+          "1393582057",
+          "1431253446",
+          "1498349481",
+          "193168",
+          "1357155628",
+          "1380849352",
+          "2040096451",
+          "2052166461",
+          "1815967937",
+          "1809975312",
+          "1457510012",
+          "1320097103",
+          "296882",
+          "2009519847",
+          "416385506",
+          "1925830700",
+          "239682",
+          "1940210058",
+          "2068046655"
+        ];
+        const ids = likeId.join(",");
         const res = await getSongDetail({ ids });
         const { songs, code } = res.data;
-        this.initList = JSON.stringify(songs)
+        this.initList = JSON.stringify(songs);
         if (code === 200) {
-          this.recommendList = songs
-            ? songs
-            : defaultImages.songs;
+          this.recommendList = songs ;
         }
-      } else {
-        this.recommendList = defaultImages.songs;
       }
     },
     playSing(id) {
       uni.navigateTo({
         url: `/pages/music/index`,
       });
-      uni.setStorageSync('musicId', id)
-      uni.setStorageSync('musicIdList', JSON.stringify(this.recommendList))
+      uni.setStorageSync("musicId", id);
+      uni.setStorageSync("musicIdList", JSON.stringify(this.recommendList));
     },
   },
 };
@@ -127,7 +171,9 @@ export default {
   
 <style scoped lang="scss">
 .anLike {
-  height: calc(100vh - 200rpx); //calc()是动态计算函数  上边距和下边距为 40 +62  综合要大于40+62 否则无法滑动
+  height: calc(
+    100vh - 200rpx
+  ); //calc()是动态计算函数  上边距和下边距为 40 +62  综合要大于40+62 否则无法滑动
 
   .anLike-content {
     padding-left: 40rpx;

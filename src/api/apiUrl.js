@@ -8,6 +8,7 @@ export const VIDEO_URL = `/video/url`; // 视频播放地址播放详情
 export const VIDEO_DETAIL = `/video/detail`; // 获取 video 详情
 export const ALL_VIDEO = `/related/allvideo`; // 相关视频
 export const PLAY_DETAIL = `/playlist/detail`; // 播放详情
+export const PLAY_LIST = `/playlist/track/all?id=24381616&limit=10&offset=1`; // 歌单所有详情
 export const  RECOMMEND_SONG = `/recommend/songs`; // 每日推荐
 export const QR_KEY = `/login/qr/key`; // 二维码 key 生成接口
 export const QR_CREATE = `/login/qr/create`; // 二维码生成接口

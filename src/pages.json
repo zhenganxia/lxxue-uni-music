@@ -31,10 +31,19 @@
         },
         {
             "path": "pages/annLike/index",
-            "name": "attention",
+            "name": "annlike",
             "desc": "安安like",
             "style": {
 				"navigationBarTitleText": "Ann Like",
+				"navigationBarBackgroundColor":"#fff"
+			}
+        },
+        {
+            "path": "pages/guWen/index",
+            "name": "guWen",
+            "desc": "小古文",
+            "style": {
+				"navigationBarTitleText": "小古文",
 				"navigationBarBackgroundColor":"#fff"
 			}
         },

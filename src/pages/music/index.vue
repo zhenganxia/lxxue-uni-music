@@ -1,35 +1,52 @@
 <template>
   <view class="music" v-if="song[0]">
-    <view class="music_title">
-      <text
-        class="iconfont icon-shangyige"
-        style="position: absolute; left: 0"
-        @click="goBack"
-      ></text>
-      <view class="music_titleSong">
-        <view class="music_titleAnimate">
-          <view
-            :class="song[0].name.length < 14 ? '' : 'music_titleAnimateLoop'"
-            >{{ song[0].name }}</view
-          >
+    <view class="music-content">
+      <view class="music_title" v-if="isSong">
+        <text
+          class="iconfont icon-shangyige"
+          style="position: absolute; left: 0"
+          @click="goBack"
+        ></text>
+        <view class="music_titleSong">
+          <view class="music_titleAnimate">
+            <view
+              :class="
+                song[0].name.length < 14 ? '' : 'music_titleAnimateLoop'
+              "
+              >{{ song[0].name }}</view
+            >
+          </view>
+          <view>{{ song[0].ar[0].name }}</view>
         </view>
-        <view>{{ song[0].ar[0].name }}</view>
+        <text
+          class="iconfont icon-share"
+          style="position: absolute; right: 0"
+        ></text>
       </view>
-      <text
-        class="iconfont icon-share"
-        style="position: absolute; right: 0"
-      ></text>
-    </view>
-    <!-- 播放图片 -->
-    <view class="music_container">
-      <image
-        class="music_needle"
-        :class="isPlayNeedle"
-        src="/static/images/song/needle.png"
-      />
-      <view class="music_discContainer" :class="isPlayDisc">
-        <image class="music_dic" src="/static/images/song/disc.png" />
-        <image class="music_dicImg" :src="song[0].al.picUrl" />
+      <view  @touchstart="changPage" v-show="isSong">
+        <!-- 播放图片 -->
+        <view class="music_container">
+          <image
+            class="music_needle"
+            :class="isPlayNeedle"
+            src="/static/images/song/needle.png"
+          />
+          <view class="music_discContainer" :class="isPlayDisc">
+            <image class="music_dic" src="/static/images/song/disc.png" />
+            <image class="music_dicImg" :src="song[0].al.picUrl" />
+          </view>
+        </view>
+      </view>
+      <!-- 歌词 -->
+      <view  v-show="!isSong"  @touchstart="changPage">
+        <lyricSong
+          ref="lyric"
+          :musicId="musicId"
+          :musicLink="musicLink"
+          :lyricTime="lyricTime"
+          :lyricsList="lyricsList"
+        >
+        </lyricSong>
       </view>
     </view>
     <!-- 播放进度条 -->
@@ -53,247 +70,259 @@
     </view>
     <!-- 底部信息 -->
     <view class="music_control">
-      <text :class="chooseMode" @click="handleChange"></text>
-      <!-- 上一首 -->
-      <text
-        class="iconfont icon-lastSong"
-        id="pre"
-        @click="handleSwitch"
-      ></text>
-      <!-- 播放 -->
-      <text :class="isPlayMusic" class="big" @click="musicPlay"></text>
-      <!-- 下一首 -->
-      <text
-        class="iconfont icon-nextSong"
-        id="next"
-        @click="handleSwitch"
-      ></text>
-      <!-- 播放列表 -->
-      <text class="iconfont icon-playList" @click="toPlayRecently"></text>
+      <view class="music_control-icon">
+        <text :class="chooseMode" @click="handleChange"></text>
+        <!-- 上一首 -->
+        <text
+          class="iconfont icon-lastSong"
+          id="pre"
+          @click="handleSwitch"
+        ></text>
+        <!-- 播放 -->
+        <text :class="isPlayMusic" class="big" @click="musicPlaySong"></text>
+        <!-- 下一首 -->
+        <text
+          class="iconfont icon-nextSong"
+          id="next"
+          @click="handleSwitch"
+        ></text>
+        <!-- 播放列表 -->
+        <text class="iconfont icon-playList" @click="toPlayRecently"></text>
+      </view>
     </view>
     <!-- 歌曲详情列表 -->
     <view v-if="isShow" class="song-detail">
       <play-recently
         :playRecentlyId="playRecentlyIdList"
+        :musicId="musicId"
         @stopSong="stopSong"
+        @listPlay="listPlay"
       ></play-recently>
     </view>
-    <!-- 歌词 -->
-     <!-- <view class="lyric-contain">
-         <view class="song-lyric" :style="lyricMove">
-           <p
-             v-for="(item,index) in lyric"
-             :key="index"
-             :style="{'font-size': (index==currentRow ? '1.3rem':'.9rem')}"
-             class="lyric-row"
-           >{{item.text}}</p>
-           <p
-               v-for="(item,index) in lyric"
-               :key="index"
-             >{{item.text}}</p>
-         </view>
-       </view> -->
   </view>
 </template>
 
 <script>
 import playRecently from "./playRecently/playRecently.vue";
+import lyricSong from "./lyricSong.vue";
 import { getSongDetail, getSongUrl, getLyric } from "@/api/discover.js";
 
 const app = getApp().globalData;
-const createInnerAudioContext = uni.createInnerAudioContext();
-let _musicLink = "";
+let audio = undefined; // 音乐背景实例参数
 let _durationTimeNum = 0;
-let _playMode = {
-  sequence: 0,
-  random: 1,
-  loop: 2,
-};
-let _isMovingSlider = false;
-let _musicIdList = [];
 export default {
+  name: "musicList",
+  components: { lyricSong, playRecently },
   data() {
     return {
-      lyricMove:{},
-      currentRow:undefined,
-      lyric:[],
+      isSong: true,
+      lyricMove: {},
+      currentRow: undefined,
+      lyric: [],
       playRecentlyId: undefined,
       song: [], //歌曲详情,
-      musicId: '', //音乐id
+      musicId: uni.getStorageSync("musicId"), //音乐id
+      musicIdList: JSON.parse(uni.getStorageSync("musicIdList")) || [], // 音乐id 列表
       isPlay: false,
-      mode: 0,
+      mode: 1, // 判断播放方式 1：列表播放 2：随机播放  3：循环播放
       currentTime: "00:00",
       durationTime: "00:00",
       isShow: false,
-      playRecentlyIdList: [],
-      isRandom: false,
-      isloop: false,
+      playRecentlyIdList: [], // 当前播放详情列表
       sliderValue: 0,
+      isMovingSlider: false, // 判断进度
+      musicLink: "", // 播放url
+      lyricsList: [], // 歌词
+      lyricIndex: 0,
+      lyricTime: 0,
     };
   },
-  // watch: {
-  //   // 监听当前播放时间
-  //   currentTime() {
-  //     this.lyric.forEach((element, index) => {
-  //       if (this.currentTime == element.time) {
-  //         this.lyricMove.top = -index * 2.5 + 6 + "rem";
-  //         this.currentRow = index; //通过比较我们歌词属性里的时间与当前播放时间，来定位到该歌词
-  //       }
-  //     });
-  //   }
-  // },
 
   async onLoad() {
-   let musicId = this.musicId = uni.getStorageSync('musicId') || ''
-    const musicIdList = JSON.parse(uni.getStorageSync('musicIdList')) 
-    this.playRecentlyIdList = musicIdList;
-    _musicIdList = musicIdList;
-    if (!musicId && musicIdList.length > 0) {
-      musicId = this.musicId = musicIdList[0]?.id;
+    this.playRecentlyIdList = this.musicIdList;
+    if (!this.musicId && this.musicIdList.length > 0) {
+      // 如果没有当前播放获取播放列表数据第一个id播放
+      this.musicId = this.musicIdList[0]?.id;
     }
-    await this.getMusicInfo(musicId);
-    //判断当前页面音乐是否在播放
-    if (app.isMusicPlay) {
-      this.isPlay = true;
-      // this.musicId = this.musicId;
-      uni.setStorageSync('musicId',this.musicId)
-    }
-    this.mode = app.playwaynum;
-    //判断播放顺序
-    switch (this.mode) {
-      case 1:
-        this.isRandom = false;
-        this.isloop = false;
-        break;
-      case 2:
-        this.isRandom = true;
-        this.isloop = false;
-        break;
-      case 3:
-        this.isRandom = false;
-        this.isloop = true;
-        break;
-    }
+    await this.getMusicInfo();
+  },
+  onUnload() {
+    // 销毁audio实例
+    audio.destroy();
   },
   methods: {
-	// 获取歌曲详情，图片、时长等
-    async getMusicInfo(musicId) {
-      let songData = await getSongDetail({ ids: musicId });
+    changPage() {
+      if (this.lyricsList && this.lyricsList.length > 0) {
+        this.isSong = !this.isSong;
+      }
+    },
+    // 获取歌词
+    async getLyricList() {
+      const musicId = uni.getStorageSync("musicId");
+      const lyricList = await getLyric({ id: musicId });
+      const { code, lrc } = lyricList.data;
+      if (code === 200) {
+        this.formatLyric(lrc.lyric);
+      } else {
+        this.error = "加载失败！";
+      }
+    },
+    //传入初始歌词文本text
+    formatLyric(text) {
+      this.lyricsList = []
+      let arr = text.split("\n"); //原歌词文本已经换好行了方便很多，我们直接通过换行符“\n”进行切割
+      let row = arr.length; //获取歌词行数
+      for (let i = 0; i < row; i++) {
+        let temp_row = arr[i]; //现在每一行格式大概就是这样"[00:04.302][02:10.00]hello world";
+        let temp_arr = temp_row.split("]"); //我们可以通过“]”对时间和文本进行分离
+        let text = temp_arr.pop(); //把歌词文本从数组中剔除出来，获取到歌词文本了！
+        //再对剩下的歌词时间进行处理
+        temp_arr.forEach((element) => {
+          let obj = {};
+          let time_arr = element.substr(1, element.length - 1).split(":"); //先把多余的“[”去掉，再分离出分、秒
+          let s = parseInt(time_arr[0]) * 60 + Math.ceil(time_arr[1]); //把时间转换成与lyricTime相同的类型，方便待会实现滚动效果
+          obj.time = s;
+          obj.text = text;
+          this.lyricsList.push(obj); //每一行歌词对象存到组件的lyric歌词属性里
+        });
+      }
+      this.lyricsList
+        .sort(this.sortRule) // 按照时间重新排序
+        .map((item, index) => {
+          const next = this.lyricsList[index + 1];
+          if (next) {
+            item.timeDuration = [item.time, next.time];
+            item.timeDurationTime = next.time - item.time;
+            return item;
+          }
+        });
+      console.log("333333333333333333", this.lyricsList);
+    },
+    sortRule(a, b) {
+      //设置一下排序规则
+      return a.time - b.time;
+    },
+    // 获取歌曲详情，图片、时长等
+    async getMusicInfo() {
+      let songData = await getSongDetail({ ids: this.musicId });
       const { code, songs } = songData.data;
       if (code === 200) {
         this.song = songs;
         // 悬浮播放器信息
         let musicInfo = {
-          isPlay: app.isMusicPlay,
+          isPlay: this.isPlay,
           song: songs[0],
-          musicId,
+          musicId: this.musicId,
         };
         uni.$emit("musicBottom", {
           msg: musicInfo,
         });
         _durationTimeNum = songs.length > 0 ? songs[0]?.dt : undefined;
         this.durationTime = String(this.handleTime(_durationTimeNum));
+        await this.musicControl();
+        await this.getLyricList();
       }
     },
-    async musicPlay() {
+    // 播放按钮
+    async musicPlaySong() {
       this.isPlay = !this.isPlay;
-      app.isMusicPlay = this.isPlay;
-      let { musicId, isPlay } = this.$data;
-      await this.musicControl(musicId, isPlay, _musicLink);
+      await this.musicControl();
     },
-    /**
-     * 播放音乐
-     * @param {*String} musicId 需要播放歌曲id
-     * @param {*Boolean} isPlay 是否正在播放
-     * @param {*String} musicLink 需要播放链接
-     */
-    async musicControl(musicId, isPlay, musicLink) {
-      if (isPlay) {
-        app.isMusicPlay = true;
-        if (!musicLink || this.musicId !== musicId) {
-          //获取播放链接
-          const musicLinkData = await getSongUrl({ id: musicId });
-          const { code, data } = musicLinkData.data;
-          if (code === 200) {
-            _musicLink = data[0].url === musicLink ? musicLink : data[0].url;
-            if (!_musicLink) {
-              uni.showToast({
-                title: "此曲不可播放,请点击下一曲",
-                icon: "none",
-              });
-            }
-            if (this.isloop) {
-              createInnerAudioContext.onEnded(() => {
-                createInnerAudioContext.src = _musicLink;
-                createInnerAudioContext.play();
-              });
-            }
-            createInnerAudioContext.startTime =
-              createInnerAudioContext.currentTime;
+    // 音乐播放
+    async musicControl() {
+      if (audio && Object.keys(audio).length !== 0) {
+        audio.destroy();
+      }
+      audio = uni.createInnerAudioContext();
+
+      if (this.isPlay) {
+        //获取播放链接
+        const musicLinkData = await getSongUrl({ id: this.musicId });
+        const { code, data } = musicLinkData.data;
+        if (code === 200) {
+          this.musicLink = data[0].url;
+          if (!this.musicLink) {
+            uni.showToast({
+              title: "此曲不可播放,请点击下一曲",
+              icon: "none",
+            });
+            this.isPlay = false;
+            return;
           }
+          audio.startTime = audio.currentTime;
+          audio.autoplay = true;
+          audio.src = this.musicLink;
+          console.log("6666666666666666666666", this.musicLink);
+          audio.title = this.song[0].name;
+          // audio.play();//
         }
-        createInnerAudioContext.autoplay = true;
-        createInnerAudioContext.src = _musicLink;
-        createInnerAudioContext.title = this.song[0].name;
-        // createInnerAudioContext.play();//
       } else {
-        app.currentTimeNum = createInnerAudioContext.currentTime;
-        createInnerAudioContext.pause();
+        app.currentTimeNum = audio.currentTime;
+        audio.pause();
       }
 
-      //监听音乐的播放/暂停/停止/自动完成播放
-      createInnerAudioContext.onPlay(() => {
-        app.isMusicPlay = this.isPlay = true;
-        this.musicId = musicId;
-        createInnerAudioContext.seek(
-          new Date(app.currentTimeNum).getMilliseconds()
-        );
+      //音乐的播放
+      audio.onPlay(() => {
+        this.isPlay = true;
+        audio.seek(new Date(app.currentTimeNum).getMilliseconds());
       });
-      createInnerAudioContext.onPause(() => {
-        app.isMusicPlay = this.isPlay = false;
+
+      // 音乐暂停
+      audio.onPause(() => {
+        this.isPlay = false;
       });
-      // 播放完成
-      createInnerAudioContext.onEnded(() => {
-        this.next(_musicIdList, false);
+
+      // 播放完成播放下一首
+      audio.onEnded(async () => {
+        this.preNext("next");
       });
+
       //监听音乐实时播放的时间
-      createInnerAudioContext.onTimeUpdate(() => {
-        let currentTimeNum = createInnerAudioContext.currentTime;
+      audio.onTimeUpdate(() => {
+        let currentTimeNum = audio.currentTime;
         this.sliderValue = (currentTimeNum / _durationTimeNum) * 1000 * 100;
         this.currentTime = String(this.handleTime(currentTimeNum * 1000));
+        let time_arr = this.currentTime.split(":"); //先把多余的“[”去掉，再分离出分、秒
+        this.lyricTime = parseInt(time_arr[0]) * 60 + Math.ceil(time_arr[1]); //把时间转换成与currentTime相同的类型，方便待会实现滚动效果
       });
-      // this.getLyricList()
     },
     handleSwitch(e) {
       let type = e.currentTarget.id;
-      createInnerAudioContext.stop();
-      let isRandom = this.isRandom;
-      switch (type) {
-        case "pre":
-          this.pre(_musicIdList, isRandom);
-          break;
-        case "next":
-          this.next(_musicIdList, isRandom);
-          break;
-      }
+      audio.stop();
+      this.preNext(type);
     },
-    //上一曲
-    async pre(musicIdList, isRandom) {
+    /**
+     *
+     * @param {*} type // 默认播放上一首，上一首下一首歌曲切换参数
+     */
+    async preNext(type = "pre") {
+      const musicIdList = this.musicIdList;
       if (musicIdList.length < 2) {
         uni.showToast({
           title: "此曲为单曲",
           icon: "none",
         });
-      } else if (isRandom) {
+        return;
+      }
+      this.isPlay = true;
+      if (this.mode === 2) {
+        // 随机播放
         this.handleRandomEvent();
+      } else if (this.mode === 3) {
+        // 单曲播放
+        audio.src = this.musicLink;
       } else {
-        let musicId = this.musicId;
-        let index = musicIdList.findIndex((v) => v.id == musicId);
+        let index = musicIdList.findIndex((v) => v.id == this.musicId);
         if (index !== -1) {
+          // 上一首
           let nextSong = musicIdList[index - 1];
-          this.musicId = nextSong.id;
-          await this.getMusicInfo(this.musicId);
-          await this.musicControl(this.musicId, true);
+          if (type !== "pre") {
+            // 下一首
+            nextSong = musicIdList[index + 1];
+          }
+          this.musicId = nextSong?.id;
+          uni.setStorageSync("musicId", this.musicId);
+          await this.getMusicInfo();
         } else {
           uni.showToast({
             title: "此曲为第一首",
@@ -304,87 +333,36 @@ export default {
       this.sliderValue = 0;
       this.currentTime = "00:00";
     },
-    //下一曲
-    async next(musicIdList, isRandom) {
-      if (musicIdList.length < 2) {
-        uni.showToast({
-          title: "此曲为单曲",
-          icon: "none",
-        });
-      } else if (isRandom) {
-        this.handleRandomEvent();
-      } else {
-        let musicId = this.musicId;
-        let index = musicIdList.findIndex((v) => v.id == musicId);
-        if (musicIdList.length !== index + 1) {
-          let nextSong = musicIdList[index + 1];
-          this.musicId = nextSong.id;
-          await this.getMusicInfo(this.musicId);
-          await this.musicControl(this.musicId, true);
-        } else {
-          uni.showToast({
-            title: "词曲为最后一首",
-            icon: "none",
-          });
-        }
-      }
-      this.sliderValue = 0;
-      this.currentTime = "00:00";
-    },
+    // 播放方式，循环、随机、单曲
     handleChange() {
-      let mode = (app.playwaynum = this.mode = (this.mode + 1) % 3);
-      switch (mode) {
-        case 1:
-          mode += 1;
-          uni.showToast({
-            title: "随机播放",
-            icon: "success",
-          });
-          this.isRandom = true;
-          this.isloop = false;
-          break;
-        case 2:
-          mode += 1;
-          wx.showToast({
-            title: "单曲循环",
-            icon: "success",
-          });
-          this.isRandom = false;
-          this.isloop = true;
-          break;
-        default:
-          mode = 1;
-          uni.showToast({
-            title: "列表循环",
-            icon: "success",
-          });
-          this.isRandom = false;
-          this.isloop = false;
-          break;
+      this.mode = this.mode + 1;
+      const songStatus = {
+        1: "列表循环",
+        2: "随机播放",
+        3: "单曲循环",
+      };
+      if (this.mode > 3) {
+        // 重新点击
+        this.mode = 1;
       }
+      const playBack = songStatus[this.mode];
+      uni.showToast({
+        title: playBack,
+        icon: "success",
+      });
     },
     //随机播放事件
-    handleRandomEvent() {
-      let musicId = this.musicId;
-      let musicIdList = _musicIdList;
-      let length = musicIdList.length;
-      let index;
-      if (length < 2) {
-        this.musicControl(musicId, true);
-        return;
+    async handleRandomEvent() {
+      const len = this.musicIdList.length;
+      const lenIndex = [];
+      for (let i = 0; i < len; i++) {
+        lenIndex.push(i);
       }
-      if (length === 1) {
-        musicId = musicIdList[0];
-      } else {
-        do {
-          let range = length - 0;
-          let rand = Math.random();
-          index = 0 + Math.round(rand * range);
-        } while (musicId === musicIdList[index] || index >= musicIdList.length);
-        this.musicId = musicId = musicIdList[index];
-      }
-      this.getMusicInfo(musicId);
-      this.musicControl(musicId, true);
+      const randomIndex = Math.floor(Math.random() * lenIndex.length);
+      const currentSong = this.musicIdList[randomIndex];
+      this.musicId = currentSong.id;
+      uni.setStorageSync("musicId", currentSong.id);
+      await this.getMusicInfo();
     },
     handleTime(time) {
       let minute = Math.floor(time / 1000 / 60);
@@ -394,24 +372,24 @@ export default {
       return minute + ":" + second;
     },
     sliderChange(e) {
-      if (!_isMovingSlider) {
+      if (!this.isMovingSlider) {
         this.sliderValue = e.detail.value;
         let position = (e.detail.value / 100) * _durationTimeNum;
         this.currentTime = String(this.handleTime(position));
-        createInnerAudioContext.seek(position / 1000);
+        audio.seek(position / 1000);
       }
     },
     sliderMoveStart() {
-      _isMovingSlider: true;
+      this.isMovingSlider = true;
     },
     sliderMoveEnd() {
-      _isMovingSlider: false;
+      this.isMovingSlider = false;
     },
     toPlayRecently() {
       this.isShow = !this.isShow;
     },
     // 返回上一级
-   async  goBack() {
+    async goBack() {
       Object.assign(app, {
         isMusicPlay: false, // 当前是否在播放
         musicId: "",
@@ -419,62 +397,65 @@ export default {
         musicIdList: [],
         currentTimeNum: 0,
         playwaynum: 0,
-        song:[]
+        song: [],
       });
-      createInnerAudioContext.stop();
-      uni.setStorageSync('musicId','')
-      uni.setStorageSync('musicIdList',JSON.stringify([]))
+      this.musicLink = "";
+      uni.setStorageSync("musicId", "");
+      uni.setStorageSync("musicIdList", JSON.stringify([]));
+      audio.destroy();
       uni.navigateBack({
         delta: 1,
       });
     },
-    async stopSong(song, id) {
-      this.musicId = id;
+    async stopSong(musicId) {
       if (this.isPlay) {
         // 删除时正在播放
-        this.next(song, false);
-      } else {
-        // 删除时未播放
-        let index = song.findIndex((v) => v.id == id);
-        let nextSong = song[index + 1];
-        this.musicId = nextSong.id;
-        this.currentTime = "00:00";
-        await this.getMusicInfo(this.musicId);
+        this.musicId = musicId;
+        await this.preNext("next");
       }
     },
-    // 获取歌词
-//     async getLyricList() {
-//     const lyricList =   await getLyric({id:this.musicId});
-//       const { code, lrc } = lyricList.data;
-//       if(code === 200) {
-//         this.formatLyric(lrc.lyric)
-//       }
-//     },
-//     //传入初始歌词文本text
-// formatLyric(text) {
-//       let arr = text.split("\n"); //原歌词文本已经换好行了方便很多，我们直接通过换行符“\n”进行切割
-//       let row = arr.length; //获取歌词行数
-//       for (let i = 0; i < row; i++) {
-//         let temp_row = arr[i]; //现在每一行格式大概就是这样"[00:04.302][02:10.00]hello world";
-//         let temp_arr = temp_row.split("]");//我们可以通过“]”对时间和文本进行分离
-//         let text = temp_arr.pop(); //把歌词文本从数组中剔除出来，获取到歌词文本了！
-//         //再对剩下的歌词时间进行处理
-//         temp_arr.forEach(element => {
-//           let obj = {};
-//           let time_arr = element.substr(1, element.length - 1).split(":");//先把多余的“[”去掉，再分离出分、秒
-//           let s = parseInt(time_arr[0]) * 60 + Math.ceil(time_arr[1]); //把时间转换成与currentTime相同的类型，方便待会实现滚动效果
-//           obj.time = s;
-//           obj.text = text;
-//           this.lyric.push(obj); //每一行歌词对象存到组件的lyric歌词属性里
-//         });
-//       }
-//       this.lyric.sort(this.sortRule); //由于不同时间的相同歌词我们给排到一起了，所以这里要以时间顺序重新排列一下
-//       console.log('333333333333333333',this.lyric)
-//     },
-    sortRule(a, b) { //设置一下排序规则
-      return a.time - b.time;
-    }
-
+    async listPlay(musicId) {
+      this.musicId = musicId;
+      await this.getMusicInfo();
+    },
+    // // 获取歌词
+    //     async getLyricList() {
+    //     const lyricList =   await getLyric({id:this.musicId});
+    //       const { code, lrc } = lyricList.data;
+    //       if(code === 200) {
+    //         this.formatLyric(lrc.lyric)
+    //         this.lyricsList = lrc.lyric
+    //       }
+    //     },
+    //传入初始歌词文本text
+    // formatLyric(text) {
+    //       let arr = text.split("\n"); //原歌词文本已经换好行了方便很多，我们直接通过换行符“\n”进行切割
+    //       let row = arr.length; //获取歌词行数
+    //       for (let i = 0; i < row; i++) {
+    //         let temp_row = arr[i]; //现在每一行格式大概就是这样"[00:04.302][02:10.00]hello world";
+    //         let temp_arr = temp_row.split("]");//我们可以通过“]”对时间和文本进行分离
+    //         let text = temp_arr.pop(); //把歌词文本从数组中剔除出来，获取到歌词文本了！
+    //         //再对剩下的歌词时间进行处理
+    //         temp_arr.forEach((element,index) => {
+    //           let obj = {};
+    //           // let time_arr = element.substr(1, element.length - 1).split(":");//先把多余的“[”去掉，再分离出分、秒
+    //           const time = element.substr(1, element.length - 1).split(".")
+    //           // console.log('mmmmmmmmmmmmmmmmm',time[0])
+    //           // let s = parseInt(time_arr[0]) * 60 + Math.ceil(time_arr[1]); //把时间转换成与currentTime相同的类型，方便待会实现滚动效果
+    //           obj.time = time[0];
+    //           obj.text = text;
+    //           obj.index = index
+    //           // console.log('999999999999999999999999999999',time_arr,Math.ceil(time_arr[1]),obj)
+    //           this.lyricsList.push(obj); //每一行歌词对象存到组件 lyricsList歌词属性里
+    //         });
+    //       }
+    //       this.lyricsList.sort(this.sortRule); //由于不同时间的相同歌词我们给排到一起了，所以这里要以时间顺序重新排列一下
+    //       console.log('333333333333333333',this.lyricsList)
+    //     },
+    // sortRule(a, b) {
+    //   //设置一下排序规则
+    //   return a.time - b.time;
+    // },
   },
   computed: {
     isPlayNeedle() {
@@ -487,27 +468,25 @@ export default {
       return this.isPlay ? "iconfont icon-play" : "iconfont icon-pause";
     },
     chooseMode() {
-      return this.mode === _playMode.sequence
+      return this.mode === 1
         ? "iconfont icon-sequence"
-        : this.mode === _playMode.loop
+        : this.mode === 3
         ? "iconfont icon-loop"
         : "iconfont icon-random";
     },
   },
-  components: {
-    playRecently,
-  },
 };
 </script>
 
-<style>
+<style lang="scss">
 uni-page-body,
 body {
   height: 100%;
 }
 
 .music {
-  height: 90%;
+  height: 100vh;
+  background: linear-gradient(to right bottom, rgb(139, 122, 122), #000000 90%);
 }
 
 .music_title {
@@ -558,8 +537,6 @@ body {
 }
 
 .music_container {
-  /* background-image: linear-gradient(#000000 75%,#7e3f00); */
-  background: linear-gradient(to left top, #000000 75%, #7e3f00);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -619,7 +596,7 @@ body {
 }
 
 .control-process {
-  position: absolute;
+  position: fixed;
   bottom: 150rpx;
   width: 700rpx;
   height: 100rpx;
@@ -638,16 +615,27 @@ body {
   color: #fff;
 }
 
+.music-content {
+  // height: 92%;
+}
+
 .music_control {
-  /* background: linear-gradient(#7e3f00,#000000 80%); */
-  background: linear-gradient(to right top, #7e3f00, #000000 90%);
-  position: absolute;
-  height: 120rpx;
+  // background: linear-gradient(to right bottom, #4c4242, #000000 95%);
+  // background: #000000;s
+  position: fixed;
+  height: 8%;
   left: 0;
   bottom: 0;
   width: 100%;
   display: flex;
   color: #000000;
+
+  .music_control-icon {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+  }
 }
 
 .music_control text {
@@ -667,21 +655,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: -999;
+  // z-index: 3000;
 }
-.lyric-contain {
-  position: fixed;
-  z-index: 999;
-  bottom: 150rpx;
-  width: 100%;
-  height: 30%;
-  overflow: scroll;
-  color:#fff;
-}
-.song-lyric {
-  position: absolute;
-  transform: translate(-50%,-50%);
-  left: 0;
-  top:0;
-}
+
 </style>

@@ -18,7 +18,7 @@
             <view v-for="(item, index) in articalAllSongs" :key="index" class="attention-sing">
               <view class="flex-between">
                 <view class="flex-start">
-                  <view style="margin-top:40rpx" class="flex-start">
+                  <view  class="flex-start">
                     <view class="reg-text-name">
                         <span >{{ item.name }}</span>
                     </view>
@@ -26,12 +26,12 @@
                   </view>
                 </view>
                 <view class="flex-start">
-                  <view class="list-play" @click="playSing(item.id)">
+                  <view class="list-play">
                     <image style="width: 100%; height: 100%" mode="aspectFill" :src="listPlay"></image>
                   </view>
-                  <view class="good-icon">
+                  <!-- <view class="good-icon">
                     <uni-icons type="more-filled" size="18" />
-                  </view>
+                  </view> -->
                 </view>
               </view>
             </view>
@@ -160,7 +160,7 @@
       }
   
       .attention-scroll {
-        padding-top: 40px;
+        padding-top: 80rpx;
       }
   
       .attention-sing {
