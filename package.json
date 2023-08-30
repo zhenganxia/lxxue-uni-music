@@ -101,8 +101,8 @@
     "miniprogram-api-typings": "*",
     "node-sass": "^4.14.1",
     "postcss-comment": "^2.0.0",
-    "sass": "^1.62.0",
-    "sass-loader": "^10.1.1",
+    "sass": "^1.41.1",
+    "sass-loader": "^7.0.3",
     "vue-template-compiler": ">= 2.6.14 < 2.7"
   },
   "browserslist": [
