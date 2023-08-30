@@ -1,6 +1,6 @@
 {
-    "name" : "网易云音乐",
-    "appid" : "__UNI__C9B40E0",
+    "name" : "lxxue-music",
+    "appid" : "__UNI__2D14344",
     "description" : "",
     "versionName" : "1.0.0",
     "versionCode" : "100",
@@ -14,49 +14,10 @@
         "usingComponents" : true,
         "distribute" : {
             "android" : {
-                "permissions" : [
-                    // "<uses-permission android:name=\"android.permission.CHANGE_NETWORK_STATE\"/>",
-                    // "<uses-permission android:name=\"android.permission.MOUNT_UNMOUNT_FILESYSTEMS\"/>",
-                    // "<uses-permission android:name=\"android.permission.READ_CONTACTS\"/>",
-                    // "<uses-permission android:name=\"android.permission.VIBRATE\"/>",
-                    // "<uses-permission android:name=\"android.permission.READ_LOGS\"/>",
-                    // "<uses-permission android:name=\"android.permission.ACCESS_WIFI_STATE\"/>",
-                    // "<uses-feature android:name=\"android.hardware.camera.autofocus\"/>",
-                    // "<uses-permission android:name=\"android.permission.WRITE_CONTACTS\"/>",
-                    // "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\"/>",
-                    // "<uses-permission android:name=\"android.permission.CAMERA\"/>",
-                    // "<uses-permission android:name=\"android.permission.RECORD_AUDIO\"/>",
-                    // "<uses-permission android:name=\"android.permission.GET_ACCOUNTS\"/>",
-                    // "<uses-permission android:name=\"android.permission.MODIFY_AUDIO_SETTINGS\"/>",
-                    // "<uses-permission android:name=\"android.permission.READ_PHONE_STATE\"/>",
-                    // "<uses-permission android:name=\"android.permission.CHANGE_WIFI_STATE\"/>",
-                    // "<uses-permission android:name=\"android.permission.WAKE_LOCK\"/>",
-                    // "<uses-permission android:name=\"android.permission.CALL_PHONE\"/>",
-                    // "<uses-permission android:name=\"android.permission.FLASHLIGHT\"/>",
-                    // "<uses-permission android:name=\"android.permission.ACCESS_COARSE_LOCATION\"/>",
-                    // "<uses-feature android:name=\"android.hardware.camera\"/>",
-                    // "<uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/>",
-                    // "<uses-permission android:name=\"android.permission.WRITE_SETTINGS\"/>"
-                ]
+                "permissions" : []
             },
             "ios" : {},
-            "sdkConfigs" : {
-                // "oauth" : {
-                //     "qq" : {
-                //         "appid" : "1111281378"
-                //     },
-                //     "weixin" : {
-                //         "appid" : "wxdcf77d83e98016f2",
-                //         "appsecret" : "",
-                //         "UniversalLinks" : ""
-                //     },
-                //     "sina" : {
-                //         "appkey" : "3932444125",
-                //         "appsecret" : "afa36784b5a64aba6df3effeb9df3af5",
-                //         "redirect_uri" : "http://open.weibo.com/apps/3932444125/privilege/oauth"
-                //     }
-                // }
-            }
+            "sdkConfigs" : {}
         },
         "nvueLaunchMode" : ""
     },

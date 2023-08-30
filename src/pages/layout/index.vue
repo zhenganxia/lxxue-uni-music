@@ -10,7 +10,10 @@
         class="content-container"
       >
         <!-- 默认discover页面 -->
-        <component :is="currentActive" v-model="info"></component>
+        <discover v-if="currentActive === 'discover'"></discover>
+        <cloud v-if="currentActive === 'cloud'"></cloud>
+        <mine v-if="currentActive === 'mine'"></mine>
+        <fm v-if="currentActive === 'fm'"></fm>
       </view>
     </cover-view>
     <bottomBar class="content-body"></bottomBar>
